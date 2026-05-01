@@ -180,8 +180,7 @@ jobs:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          if [ -f "report_xml.xml" ]; then
-            echo "Report found, uploading to DefectDojo..."
+          if [ -s "report_xml.xml" ]; then
             curl -k -L -X POST "${DD_URL}/reimport-scan/" \
               -H "Authorization: Token ${DD_TOKEN}" \
               -H "ngrok-skip-browser-warning: true" \
@@ -195,8 +194,7 @@ jobs:
               -F "minimum_severity=Info" \
               -F "close_old_findings=true"
           else
-            echo "Error: report_xml.xml not found. Check ZAP logs above."
-            ls -la
+            echo "ZAP report not found, skipping upload."
           fi
   
   # ---------------------------------------------------

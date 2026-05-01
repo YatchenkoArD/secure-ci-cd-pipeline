@@ -35,7 +35,7 @@
 > **Инсайт:** Интеграция настроена через GitHub Actions с использованием API DefectDojo, что обеспечивает актуальность данных при каждом пуше в ветку `main`.
 
 <p align="center">
-  <img src="docs/dashboard_screenshot.png" width="800" title="dashboard_screenshot">
+  <img src="docs/dashboard_screenshot.png" width="600" title="dashboard_screenshot">
 </p>
 
 ---
@@ -59,6 +59,3 @@
 
 ### 🏁 Заключение
 Данный проект демонстрирует концепцию **Shift Left Security** — обнаружение и исправление уязвимостей на ранних этапах разработки, что значительно снижает стоимость исправления ошибок и повышает общую защищенность продукта.
-
-
-```
