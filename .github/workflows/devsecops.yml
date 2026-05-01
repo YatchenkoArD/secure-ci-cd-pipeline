@@ -127,7 +127,7 @@ jobs:
 
       - name: Run Kubesec
         run: |
-          docker run -i kubesec/kubesec:v2 scan /dev/stdin < /k8s/deployment.yaml > kubesec-report.json || echo "Issues found"
+          docker run -i kubesec/kubesec:v2 scan /dev/stdin < k8s/deployment.yaml > k8s/kubesec-report.json || echo "Issues found"
 
       - name: Upload Kubesec report to DefectDojo
         if: always()
@@ -143,7 +143,7 @@ jobs:
             -F "scan_type=Kubesec Scan" \
             -F "product_name=GitHub-Sucure CI/CD" \
             -F "engagement_name=CI-CD-Pipeline" \
-            -F "file=@kubesec-report.json" \
+            -F "file=@k8s/kubesec-report.json" \
             -F "scan_date=$(date +%Y-%m-%d)" \
             -F "minimum_severity=Info" \
             -F "close_old_findings=true"
