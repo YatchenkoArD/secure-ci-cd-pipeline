@@ -127,7 +127,7 @@ jobs:
 
       - name: Run Kubesec
         run: |
-          docker run -i kubesec/kubesec:v2 scan /dev/stdin < deployment.yaml > kubesec-report.json || echo "Issues found"
+          docker run -i kubesec/kubesec:v2 scan /dev/stdin < /k8s/deployment.yaml > kubesec-report.json || echo "Issues found"
 
       - name: Upload Kubesec report to DefectDojo
         if: always()
