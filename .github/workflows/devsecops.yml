@@ -156,7 +156,7 @@ jobs:
 
       - name: Install dependencies and Run App
         run: |
-          pip install -r requirements.txt
+          pip install -r app/requirements.txt
           python app.py & 
           sleep 5
 
@@ -176,10 +176,7 @@ jobs:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          # ZAP Action сохраняет отчет в формате XML или Markdown. 
-          # Для DefectDojo лучше всего подходит XML (ZAP XML Report)
-          
-          curl -k -L -X POST "${DD_URL}/reimport-scan/" \
+          curl -k -L -X POST "${DD_URL}/import-scan/" \
             -H "Authorization: Token ${DD_TOKEN}" \
             -H "ngrok-skip-browser-warning: true" \
             -F "active=true" \
