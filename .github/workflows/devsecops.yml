@@ -65,7 +65,7 @@ jobs:
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
           
-          curl -k -L -X POST "${DD_URL}/reimport-scan/" \
+          curl -k -L -X POST "${DD_URL}/import-scan/" \
             -H "Authorization: Token ${DD_TOKEN}" \
             -H "ngrok-skip-browser-warning: true" \
             -F "active=true" \
