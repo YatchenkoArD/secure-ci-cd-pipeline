@@ -29,13 +29,17 @@ jobs:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          # Формируем полный путь заранее в переменной
-          ENDPOINT="/import-scan/"
-          FULL_URL="${DD_URL}${ENDPOINT}"
+          # 1. Удаляем завершающий слеш из URL, если он там есть
+          CLEAN_BASE_URL="${DD_URL%/}"
           
-          # Убираем возможные двойные слеши, если в секрете URL был слеш в конце
-          FINAL_URL=$(echo $FULL_URL | sed 's/([^:])\/\//\1\//g')
+          # 2. Формируем финальную строку
+          FINAL_URL="${CLEAN_BASE_URL}/import-scan/"
           
+          # 3. Выводим FINAL_URL в лог (GitHub сам заменит секретную часть на ***)
+          # Это поможет нам увидеть, не превратился ли URL в кашу
+          echo "Target URL: $FINAL_URL"
+          
+          # 4. Выполняем запрос
           curl -v -g -X POST "$FINAL_URL" \
           -H "Authorization: Token $DD_TOKEN" \
           -H "ngrok-skip-browser-warning: true" \
