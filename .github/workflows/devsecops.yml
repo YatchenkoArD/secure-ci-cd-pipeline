@@ -29,10 +29,10 @@ jobs:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          # В этот раз мы добавим параметр lead (ID пользователя) и engagement_type,
-          # чтобы DefectDojo мог сам создать Engagement, если он не найден.
+          # Используем reimport-scan вместо import-scan
+          # Это позволяет обновлять результаты и лучше обрабатывает создание сущностей
           
-          curl -k -L -X POST "${DD_URL}/import-scan/" \
+          curl -k -L -X POST "${DD_URL}/reimport-scan/" \
             -H "Authorization: Token ${DD_TOKEN}" \
             -H "ngrok-skip-browser-warning: true" \
             -F "active=true" \
@@ -40,7 +40,6 @@ jobs:
             -F "scan_type=Trivy Scan" \
             -F "product_name=GitHub-Sucure CI/CD" \
             -F "engagement_name=CI-CD-Pipeline" \
-            -F "engagement_type=CI/CD" \
             -F "file=@trivy-results.json" \
             -F "scan_date=$(date +%Y-%m-%d)" \
             -F "minimum_severity=Info" \
