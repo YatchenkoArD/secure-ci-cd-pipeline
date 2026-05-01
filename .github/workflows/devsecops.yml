@@ -24,7 +24,7 @@ jobs:
 
       # 2. Загружаем результаты в DefectDojo
       - name: Upload results to DefectDojo
-        if: always() # Загружаем, даже если Trivy нашел уязвимости
+        if: always()
         run: |
           curl -X POST "${{ secrets.DEFECTDOJO_URL }}/import-scan/" \
           -H "Authorization: Token ${{ secrets.DEFECTDOJO_TOKEN }}" \
@@ -32,7 +32,8 @@ jobs:
           -F "verified=true" \
           -F "scan_type=Trivy Scan" \
           -F "product_id=${{ secrets.DEFECTDOJO_PRODUCT_ID }}" \
-          -F "engagement_name=GitHub-Action-Scan" \
-          -F "file=@trivy-results.json"
+          -F "engagement_name=GitHub-Scan-${{ github.run_id }}" \
+          -F "file=@trivy-results.json" \
+          --verbose
 
 
