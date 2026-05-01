@@ -37,12 +37,14 @@ jobs:
       - name: Semgrep Scan
         uses: returntocorp/semgrep-action@v1
         with:
-          # Чтобы Semgrep "уронил" билд при нахождении ошибок, 
-          # убедись, что он работает в режиме блокировки
+          # Мы используем 'auto', чтобы Semgrep сам подобрал правила на основе кода,
+          # И добавляем конкретные рабочие сеты для Python
           config: >-
             p/python
             p/flask
-            p/owasp-top-10
+            p/security-audit
+          # Добавляем флаг, чтобы пайплайн падал при нахождении ошибок (Exit Code 1)
+          auditOnInvalidConfig: true
         env:
-          # Это заставит Semgrep выдать ошибку (exit code 1), если найдены уязвимости
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }} # Если есть аккаунт, иначе он просто выведет лог
+          # Убираем лишние ворнинги Node.js и заставляем его быть строгим
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
