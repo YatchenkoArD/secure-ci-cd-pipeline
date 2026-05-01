@@ -4,8 +4,9 @@ import os
 app = Flask(__name__)
 
 # --- СЕКРЕТЫ ДЛЯ ТЕСТИРОВАНИЯ SECRET DETECTION ---
-AWS_ACCESS_KEY_ID = "AKIAV7E5B6C7D8E9F0G1" 
-AWS_SECRET_ACCESS_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+AWS_KEY = "AKIAIMNO789ABCDEF001" 
+AWS_SECRET = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+GOOGLE_KEY = "AIzaSyA1234567890BCDEF1234567890ABCDEF"
 CRITICAL_TOKEN = "api_key_1234567890abcdef1234567890abcdef"
 DATABASE_URL = "postgresql://admin:SuperSecretPassword123@db-prod.finenomore.internal:5432/orders"
 # ------------------------------------------------
