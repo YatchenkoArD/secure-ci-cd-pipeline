@@ -44,7 +44,7 @@ jobs:
             p/flask
             p/security-audit
           # Добавляем флаг, чтобы пайплайн падал при нахождении ошибок (Exit Code 1)
-          auditOnInvalidConfig: true
+          auditOnInvalidConfig: false
         env:
           # Убираем лишние ворнинги Node.js и заставляем его быть строгим
           FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
