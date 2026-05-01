@@ -29,24 +29,23 @@ jobs:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          # 1. Формируем дату для импорта (как в инструкции)
-          TODAY=$(date +%Y-%m-%d)
+          # Сохраняем ответ сервера в файл, чтобы увидеть точную причину ошибки 400
           
-          # 2. Очищаем URL от возможных слешей в конце
-          CLEAN_URL="${DD_URL%/}"
+          curl -k -L -X POST "${DD_URL}/import-scan/" \
+            -H "Authorization: Token ${DD_TOKEN}" \
+            -H "ngrok-skip-browser-warning: true" \
+            -F "active=true" \
+            -F "verified=true" \
+            -F "scan_type=Trivy Scan" \
+            -F "product=${{ secrets.DEFECTDOJO_PRODUCT_ID }}" \
+            -F "engagement_name=GitHub-Scan-${{ github.run_id }}" \
+            -F "file=@trivy-results.json" \
+            -F "scan_date=$(date +%Y-%m-%d)" \
+            -F "minimum_severity=Info" \
+            -F "close_old_findings=true" \
+            -o response.txt -w "%{http_code}" || true
           
-          # 3. Выполняем загрузку, используя --insecure и правильные флаги формы
-          curl --insecure --fail --location --request POST "${CLEAN_URL}/import-scan/" \
-            --header "Authorization: Token ${DD_TOKEN}" \
-            --form "scan_date=${TODAY}" \
-            --form "minimum_severity=Info" \
-            --form "active=true" \
-            --form "verified=true" \
-            --form "scan_type=Trivy Scan" \
-            --form "product_id=${{ secrets.DEFECTDOJO_PRODUCT_ID }}" \
-            --form "engagement_name=GitHub-Scan-${{ github.run_id }}" \
-            --form "file=@trivy-results.json" \
-            --form "close_old_findings=true" \
-            --header "ngrok-skip-browser-warning: true"
+          echo "Server Response:"
+          cat response.txt
 
 
