@@ -29,7 +29,8 @@ jobs:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          # Выполняем загрузку с обязательным параметром product_name
+          # В этот раз мы добавим параметр lead (ID пользователя) и engagement_type,
+          # чтобы DefectDojo мог сам создать Engagement, если он не найден.
           
           curl -k -L -X POST "${DD_URL}/import-scan/" \
             -H "Authorization: Token ${DD_TOKEN}" \
@@ -38,7 +39,8 @@ jobs:
             -F "verified=true" \
             -F "scan_type=Trivy Scan" \
             -F "product_name=GitHub-Sucure CI/CD" \
-            -F "engagement_name=GitHub-Scan-${{ github.run_id }}" \
+            -F "engagement_name=CI-CD-Pipeline" \
+            -F "engagement_type=CI/CD" \
             -F "file=@trivy-results.json" \
             -F "scan_date=$(date +%Y-%m-%d)" \
             -F "minimum_severity=Info" \
