@@ -1,0 +1,38 @@
+name: DevSecOps-Pipeline
+
+on: 
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy SCA scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'app/'
+          format: 'json'
+          output: 'trivy-results.json'
+          severity: 'CRITICAL,HIGH'
+
+      # 2. Загружаем результаты в DefectDojo
+      - name: Upload results to DefectDojo
+        if: always() # Загружаем, даже если Trivy нашел уязвимости
+        run: |
+          curl -X POST "${{ secrets.DEFECTDOJO_URL }}/import-scan/" \
+          -H "Authorization: Token ${{ secrets.DEFECTDOJO_TOKEN }}" \
+          -F "active=true" \
+          -F "verified=true" \
+          -F "scan_type=Trivy Scan" \
+          -F "product_id=${{ secrets.DEFECTDOJO_PRODUCT_ID }}" \
+          -F "engagement_name=GitHub-Action-Scan" \
+          -F "file=@trivy-results.json"
+
+
