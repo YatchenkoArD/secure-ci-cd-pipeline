@@ -24,3 +24,21 @@ jobs:
           # Добавляем аргумент, чтобы сканировать все файлы в репозитории, 
           # а не только изменения в последнем коммите
           args: detect --source . --verbose
+  
+  sast-scan:
+    runs-on: ubuntu-latest
+    # Этот этап запустится только если поиск секретов прошел успешно (опционально)
+    needs: secret-detection 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Semgrep Scan
+        uses: returntocorp/semgrep-action@v1
+        with:
+          # Используем готовые наборы правил для Python, Flask и OWASP Top 10
+          config: >-
+            p/python
+            p/flask
+            p/owasp-top-10
+            p/ci
