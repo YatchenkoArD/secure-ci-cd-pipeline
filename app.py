@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 # 🎯 ЦЕЛЬ 1: Secret Detection (Поиск секретов)
 # Уязвимость: Жестко закодированный токен. Сканер (например, Gitleaks) найдет этот AWS ключ.
-AWS_ACCESS_KEY = "AKIAIOSFODNN7EXAMPLE" 
+AWS_ACCESS_KEY = "dfsdsfsdg4543fdhsf" 
 
 def init_db():
     conn = sqlite3.connect('test.db')
