@@ -103,7 +103,7 @@ jobs:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          curl -k -L -X POST "${DD_URL}/import-scan/" \
+          curl -k -L -X POST "${DD_URL}/reimport-scan/" \
             -H "Authorization: Token ${DD_TOKEN}" \
             -H "ngrok-skip-browser-warning: true" \
             -F "active=true" \
@@ -112,6 +112,38 @@ jobs:
             -F "product_name=GitHub-Sucure CI/CD" \
             -F "engagement_name=CI-CD-Pipeline" \
             -F "file=@semgrep-report.json" \
+            -F "scan_date=$(date +%Y-%m-%d)" \
+            -F "minimum_severity=Info" \
+            -F "close_old_findings=true"
+
+  # ---------------------------------------------------
+  # ЭТАП KUBESEC (K8s SAST)
+  # ---------------------------------------------------
+  sast-kubesec:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run Kubesec
+        run: |
+          docker run -i kubesec/kubesec:v2 scan /dev/stdin < deployment.yaml > kubesec-report.json || echo "Issues found"
+
+      - name: Upload Kubesec report to DefectDojo
+        if: always()
+        env:
+          DD_URL: ${{ secrets.DEFECTDOJO_URL }}
+          DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
+        run: |
+          curl -k -L -X POST "${DD_URL}/import-scan/" \
+            -H "Authorization: Token ${DD_TOKEN}" \
+            -H "ngrok-skip-browser-warning: true" \
+            -F "active=true" \
+            -F "verified=true" \
+            -F "scan_type=Kubesec Scan" \
+            -F "product_name=GitHub-Sucure CI/CD" \
+            -F "engagement_name=CI-CD-Pipeline" \
+            -F "file=@kubesec-report.json" \
             -F "scan_date=$(date +%Y-%m-%d)" \
             -F "minimum_severity=Info" \
             -F "close_old_findings=true"
