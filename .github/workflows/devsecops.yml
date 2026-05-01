@@ -140,7 +140,7 @@ jobs:
             -H "ngrok-skip-browser-warning: true" \
             -F "active=true" \
             -F "verified=true" \
-            -F "scan_type=GitLab SAST Report" \
+            -F "scan_type=Kubeaudit Scan" \
             -F "product_name=GitHub-Sucure CI/CD" \
             -F "engagement_name=CI-CD-Pipeline" \
             -F "file=@k8s/kubesec-report.json" \
