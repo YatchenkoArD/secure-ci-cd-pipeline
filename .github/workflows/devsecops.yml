@@ -157,18 +157,22 @@ jobs:
       - name: Install dependencies and Run App
         run: |
           pip install -r app/requirements.txt
-          python app.py & 
+          python app/app.py & 
           sleep 5
+
+      - name: Create ZAP report file and set permissions
+        run: |
+          touch report_xml.xml
+          chmod 777 report_xml.xml
+          chmod 777 $(pwd)
 
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: 'http://localhost:5000'
-          network_name: 'host'
-          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-z "-config view.mode=attack" -x report_xml.xml'
           fail_action: false
           allow_issue_writing: false
-          artifact_name: 'zap-report'
 
       - name: Upload ZAP Report to DefectDojo
         if: always()
@@ -176,15 +180,19 @@ jobs:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          curl -k -L -X POST "${DD_URL}/import-scan/" \
-            -H "Authorization: Token ${DD_TOKEN}" \
-            -H "ngrok-skip-browser-warning: true" \
-            -F "active=true" \
-            -F "verified=true" \
-            -F "scan_type=ZAP Scan" \
-            -F "product_name=GitHub-Sucure CI/CD" \
-            -F "engagement_name=CI-CD-Pipeline" \
-            -F "file=@report_xml.xml" \
-            -F "scan_date=$(date +%Y-%m-%d)" \
-            -F "minimum_severity=Info" \
-            -F "close_old_findings=true"
+          if [ -s "report_xml.xml" ]; then
+            curl -k -L -X POST "${DD_URL}/import-scan/" \
+              -H "Authorization: Token ${DD_TOKEN}" \
+              -H "ngrok-skip-browser-warning: true" \
+              -F "active=true" \
+              -F "verified=true" \
+              -F "scan_type=ZAP Scan" \
+              -F "product_name=GitHub-Sucure CI/CD" \
+              -F "engagement_name=CI-CD-Pipeline" \
+              -F "file=@report_xml.xml" \
+              -F "scan_date=$(date +%Y-%m-%d)" \
+              -F "minimum_severity=Info" \
+              -F "close_old_findings=true"
+          else
+            echo "ZAP report is empty or missing"
+          fi
