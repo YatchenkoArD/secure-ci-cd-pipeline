@@ -8,18 +8,19 @@ on:
     branches: [ "main" ]
 
 jobs:
-  secret-detection:
+secret-detection:
     runs-on: ubuntu-latest
     steps:
-      # Шаг 1: Скачиваем код репозитория
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Важно: скачиваем всю историю коммитов для проверки
+          fetch-depth: 0 # Скачиваем ВСЮ историю коммитов
 
-      # Шаг 2: Запускаем Gitleaks
       - name: Gitleaks Scan
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # Мы специально НЕ ставим 'continue-on-error', чтобы пайплайн упал
+        with:
+          # Добавляем аргумент, чтобы сканировать все файлы в репозитории, 
+          # а не только изменения в последнем коммите
+          args: detect --source . --verbose
