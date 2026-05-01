@@ -29,10 +29,9 @@ jobs:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          # Используем reimport-scan вместо import-scan
-          # Это позволяет обновлять результаты и лучше обрабатывает создание сущностей
+          # Используем import-scan, так как Engagement уже создан вручную
           
-          curl -k -L -X POST "${DD_URL}/reimport-scan/" \
+          curl -k -L -X POST "${DD_URL}/import-scan/" \
             -H "Authorization: Token ${DD_TOKEN}" \
             -H "ngrok-skip-browser-warning: true" \
             -F "active=true" \
