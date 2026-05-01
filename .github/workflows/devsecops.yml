@@ -160,19 +160,16 @@ jobs:
           python app/app.py & 
           sleep 10
 
-      - name: Prepare Workspace
+      - name: ZAP Scan (Docker)
         run: |
-          touch $(pwd)/report_xml.xml
-          chmod 777 $(pwd)/report_xml.xml
-          chmod 777 $(pwd)
-
-      - name: ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.12.0
-        with:
-          target: 'http://localhost:5000'
-          cmd_options: '-x report_xml.xml'
-          fail_action: false
-          allow_issue_writing: false
+          mkdir -p $(pwd)/zap-reports
+          chmod 777 $(pwd)/zap-reports
+          
+          docker run --rm -v $(pwd)/zap-reports:/zap/wrk/:rw --network="host" \
+            ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+            -t http://localhost:5000 \
+            -x report_xml.xml \
+            -I || true 
 
       - name: Upload ZAP Report to DefectDojo
         if: always()
@@ -180,7 +177,9 @@ jobs:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          if [ -s "report_xml.xml" ]; then
+          REPORT_PATH="zap-reports/report_xml.xml"
+          
+          if [ -f "$REPORT_PATH" ]; then
             curl -k -L -X POST "${DD_URL}/reimport-scan/" \
               -H "Authorization: Token ${DD_TOKEN}" \
               -H "ngrok-skip-browser-warning: true" \
@@ -189,12 +188,13 @@ jobs:
               -F "scan_type=ZAP Scan" \
               -F "product_name=GitHub-Sucure CI/CD" \
               -F "engagement_name=CI-CD-Pipeline" \
-              -F "file=@report_xml.xml" \
+              -F "file=@$REPORT_PATH" \
               -F "scan_date=$(date +%Y-%m-%d)" \
               -F "minimum_severity=Info" \
               -F "close_old_findings=true"
           else
-            echo "ZAP report not found, skipping upload."
+            echo "ZAP report not found!"
+            ls -R zap-reports/
           fi
   
   # ---------------------------------------------------
