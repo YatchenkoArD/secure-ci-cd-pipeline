@@ -148,7 +148,7 @@ jobs:
             -F "minimum_severity=Info" \
             -F "close_old_findings=true"
 
-  dast-zap:
+ dast-zap:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -158,21 +158,20 @@ jobs:
         run: |
           pip install -r app/requirements.txt
           python app/app.py & 
-          sleep 5
+          sleep 10
 
-      - name: Create ZAP report file and set permissions
+      - name: Prepare Workspace
         run: |
-          touch report_xml.xml
-          chmod 777 report_xml.xml
+          touch $(pwd)/report_xml.xml
+          chmod 777 $(pwd)/report_xml.xml
           chmod 777 $(pwd)
 
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: 'http://localhost:5000'
-          cmd_options: '-z "-config view.mode=attack" -x report_xml.xml'
+          cmd_options: '-x report_xml.xml'
           fail_action: false
-          allow_issue_writing: false
 
       - name: Upload ZAP Report to DefectDojo
         if: always()
@@ -180,8 +179,9 @@ jobs:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          if [ -s "report_xml.xml" ]; then
-            curl -k -L -X POST "${DD_URL}/import-scan/" \
+          if [ -f "report_xml.xml" ]; then
+            echo "Report found, uploading to DefectDojo..."
+            curl -k -L -X POST "${DD_URL}/reimport-scan/" \
               -H "Authorization: Token ${DD_TOKEN}" \
               -H "ngrok-skip-browser-warning: true" \
               -F "active=true" \
@@ -194,5 +194,6 @@ jobs:
               -F "minimum_severity=Info" \
               -F "close_old_findings=true"
           else
-            echo "ZAP report is empty or missing"
+            echo "Error: report_xml.xml not found. Check ZAP logs above."
+            ls -la
           fi
