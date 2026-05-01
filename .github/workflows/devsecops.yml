@@ -29,16 +29,17 @@ jobs:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          # Убираем возможные лишние слеши в конце URL и добавляем эндпоинт
-          CLEAN_URL=$(echo "${DD_URL%/}")
+          # Используем флаг -g (globoff), чтобы curl не пытался парсить URL как диапазон
+          # И добавляем -s -S для чистоты вывода, но оставляем детализацию при ошибке
           
-          curl -X POST "$CLEAN_URL/import-scan/" \
-          -H "Authorization: Token $DD_TOKEN" \
+          curl -g -X POST "${DD_URL}/import-scan/" \
+          -H "Authorization: Token ${DD_TOKEN}" \
           -F "active=true" \
           -F "verified=true" \
           -F "scan_type=Trivy Scan" \
           -F "product_id=${{ secrets.DEFECTDOJO_PRODUCT_ID }}" \
           -F "engagement_name=GitHub-Scan-${{ github.run_id }}" \
-          -F "file=@trivy-results.json"
+          -F "file=@trivy-results.json" \
+          -i
 
 
