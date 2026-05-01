@@ -148,7 +148,7 @@ jobs:
             -F "minimum_severity=Info" \
             -F "close_old_findings=true"
 
- dast-zap:
+  dast-zap:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
