@@ -56,8 +56,13 @@ jobs:
 
       - name: Run Gitleaks
         run: |
-          docker run -v ${{ github.workspace }}:/path zricethezav/gitleaks:latest detect --source="/path" -v --report-format json --report-path="/path/gitleaks-report.json" || echo "Secrets found!"
-          
+          docker run -v ${{ github.workspace }}:/path zricethezav/gitleaks:latest detect \
+            --source="/path" \
+            --no-git \
+            -v \
+            --report-format json \
+            --report-path="/path/gitleaks-report.json" || echo "Secrets found or scan issue"
+
       - name: Upload Gitleaks report to DefectDojo
         if: always()
         env:
@@ -65,7 +70,7 @@ jobs:
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
           
-          curl -k -L -X POST "${DD_URL}/import-scan/" \
+          curl -k -L -X POST "${DD_URL}/reimport-scan/" \
             -H "Authorization: Token ${DD_TOKEN}" \
             -H "ngrok-skip-browser-warning: true" \
             -F "active=true" \
