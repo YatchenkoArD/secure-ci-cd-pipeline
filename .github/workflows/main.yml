@@ -51,7 +51,6 @@ jobs:
   
   dependency-scan:
     runs-on: ubuntu-latest
-    needs: sast-scan # Запустим после SAST
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
