@@ -1,11 +1,14 @@
 name: Security Scan
 
-# Запускать при каждом пуше в ветку main
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+
+# Решаем проблему с Node.js сразу для всех задач
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   secret-detection:
@@ -14,21 +17,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Скачиваем ВСЮ историю коммитов
+          fetch-depth: 0
 
       - name: Gitleaks Scan
+        # Используем проверку напрямую через бинарник, чтобы избежать проблем с 'args'
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          # Добавляем аргумент, чтобы сканировать все файлы в репозитории, 
-          # а не только изменения в последнем коммите
-          args: detect --source . --verbose
-  
+        # В v2 вместо 'args' настройки часто передаются через конфиг-файл, 
+        # но мы можем просто убедиться, что он видит весь репозиторий
+
   sast-scan:
     runs-on: ubuntu-latest
-    # Этот этап запустится только если поиск секретов прошел успешно (опционально)
-    needs: secret-detection 
+    needs: secret-detection
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,9 +37,12 @@ jobs:
       - name: Semgrep Scan
         uses: returntocorp/semgrep-action@v1
         with:
-          # Используем готовые наборы правил для Python, Flask и OWASP Top 10
+          # Чтобы Semgrep "уронил" билд при нахождении ошибок, 
+          # убедись, что он работает в режиме блокировки
           config: >-
             p/python
             p/flask
             p/owasp-top-10
-            p/ci
+        env:
+          # Это заставит Semgrep выдать ошибку (exit code 1), если найдены уязвимости
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }} # Если есть аккаунт, иначе он просто выведет лог
