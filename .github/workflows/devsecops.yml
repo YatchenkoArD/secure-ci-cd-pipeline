@@ -29,11 +29,11 @@ jobs:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          # Используем флаг -g (globoff), чтобы curl не пытался парсить URL как диапазон
-          # И добавляем -s -S для чистоты вывода, но оставляем детализацию при ошибке
+          # Добавляем заголовок ngrok-skip-browser-warning, чтобы обойти страницу-заглушку
           
           curl -g -X POST "${DD_URL}/import-scan/" \
           -H "Authorization: Token ${DD_TOKEN}" \
+          -H "ngrok-skip-browser-warning: true" \
           -F "active=true" \
           -F "verified=true" \
           -F "scan_type=Trivy Scan" \
