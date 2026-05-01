@@ -22,16 +22,13 @@ jobs:
           output: 'trivy-results.json'
           severity: 'CRITICAL,HIGH'
 
-      # 2. Загружаем результаты в DefectDojo
       - name: Upload results to DefectDojo
         if: always()
         env:
           DD_URL: ${{ secrets.DEFECTDOJO_URL }}
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
         run: |
-          # Используем import-scan, так как Engagement уже создан вручную
-          
-          curl -k -L -X POST "${DD_URL}/import-scan/" \
+          curl -k -L -X POST "${DD_URL}/reimport-scan/" \
             -H "Authorization: Token ${DD_TOKEN}" \
             -H "ngrok-skip-browser-warning: true" \
             -F "active=true" \
@@ -47,5 +44,38 @@ jobs:
           
           echo "Server Response Status: $(cat response.txt)"
           cat response.txt
+  
+
+  secret-detection:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
+
+      - name: Run Gitleaks
+        run: |
+          docker run -v ${{ github.workspace }}:/path zricethezav/gitleaks:latest detect --source="/path" -v --report-format json --report-path="/path/gitleaks-report.json" || echo "Secrets found!"
+          
+      - name: Upload Gitleaks report to DefectDojo
+        if: always()
+        env:
+          DD_URL: ${{ secrets.DEFECTDOJO_URL }}
+          DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
+        run: |
+          
+          curl -k -L -X POST "${DD_URL}/reimport-scan/" \
+            -H "Authorization: Token ${DD_TOKEN}" \
+            -H "ngrok-skip-browser-warning: true" \
+            -F "active=true" \
+            -F "verified=true" \
+            -F "scan_type=Gitleaks Scan" \
+            -F "product_name=GitHub-Sucure CI/CD" \
+            -F "engagement_name=CI-CD-Pipeline" \
+            -F "file=@gitleaks-report.json" \
+            -F "scan_date=$(date +%Y-%m-%d)" \
+            -F "minimum_severity=Info" \
+            -F "close_old_findings=true"
 
 
